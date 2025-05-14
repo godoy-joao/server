@@ -1,0 +1,8 @@
+[19:57:33] [ServerMain/INFO]: [bootstrap] Running Java 23 (Java HotSpot(TM) 64-Bit Server VM 23.0.2+7-58; Oracle Corporation null) on Windows 11 10.0 (amd64)
+[19:57:33] [ServerMain/INFO]: [bootstrap] Loading Paper 1.21.4-230-ver/1.21.4@af71568 (2025-05-11T20:55:55Z) for Minecraft 1.21.4
+[19:57:34] [ServerMain/INFO]: [PluginInitializerManager] Initializing plugins...
+[19:57:34] [ServerMain/INFO]: [PluginInitializerManager] Initialized 0 plugins
+[19:57:35] [Paper Plugin Remapper Thread - 0/INFO]: [ReobfServer] Remapping server...
+[19:57:41] [Paper Plugin Remapper Thread - 0/INFO]: [ReobfServer] Done remapping server in 5769ms.
+[19:57:42] [ServerMain/WARN]: Failed to load eula.txt
+[19:57:42] [ServerMain/INFO]: You need to agree to the EULA in order to run the server. Go to eula.txt for more info.

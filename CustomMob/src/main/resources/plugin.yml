@@ -1,0 +1,7 @@
+name: customMob
+version: '1.0-SNAPSHOT'
+main: io.github.godoyjoao.server.customMob.CustomMobPlugin
+api-version: '1.21'
+prefix: CustomMob
+authors: [ godoyjoao ]
+description: A plugin made for creating custom mobs! (obviously) This plugin allows you to make any default mob into a much different (in stats and drops) creature!
