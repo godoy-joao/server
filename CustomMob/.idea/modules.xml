@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/custommob.iml" filepath="$PROJECT_DIR$/.idea/modules/custommob.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/custommob.main.iml" filepath="$PROJECT_DIR$/.idea/modules/custommob.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.godoyjoao.server.custommob.main.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.godoyjoao.server.custommob.main.iml" />
     </modules>
   </component>

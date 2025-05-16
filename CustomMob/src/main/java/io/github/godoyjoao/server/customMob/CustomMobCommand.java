@@ -2,12 +2,16 @@ package io.github.godoyjoao.server.customMob;
 
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.datacomponent.DataComponentType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -27,19 +31,24 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class CustomMobCommand {
 
-    public static LiteralArgumentBuilder<CommandSourceStack> createCommand(int command) {
-       if (command == 1) return Commands.literal("customMob")
+    public static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
+      return Commands.literal("customMob")
                .then(Commands.literal("summon")
                 .then(Commands.argument("id", IntegerArgumentType.integer(1))
-                        .executes(CustomMobCommand::createCustomMob)
-                ));
-       if (command == 2) return null;
-       return null;
+                        .executes(CustomMobCommand::summonCustomMob)))
+               .then(Commands.literal("add")
+                       .then(Commands.argument("name", StringArgumentType.string()))
+                       .then(Commands.argument("entity", ArgumentTypes.entity()))
+                       .executes(CustomMobCommand::createCustomMob));
     }
 
-
-
     private static int createCustomMob(CommandContext<CommandSourceStack> ctx) {
+
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int summonCustomMob(CommandContext<CommandSourceStack> ctx) {
         int id = IntegerArgumentType.getInteger(ctx, "id");
         CommandSender sender = ctx.getSource().getSender();
         if (!(sender instanceof Player player)) {
