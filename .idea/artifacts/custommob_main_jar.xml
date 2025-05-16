@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="custommob.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/custommob_main_jar</output-path>
+    <root id="root">
+      <element id="archive" name="custommob.main.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/CustomMob/out/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="custommob.main" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,5 @@
+name: CustomMobPlugin
+version: '1.0'
+main: io.github.godoyjoao.server.customMob.CustomMobPlugin
+description: Paper Test Plugin
+api-version: '1.21.4'

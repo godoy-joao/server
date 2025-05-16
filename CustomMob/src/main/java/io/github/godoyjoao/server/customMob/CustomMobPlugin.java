@@ -11,7 +11,8 @@ public final class CustomMobPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        LiteralCommandNode<CommandSourceStack> command = CustomMobCommand.createCommand().build();
+
+        LiteralCommandNode<CommandSourceStack> command = CustomMobCommand.createCommand(1).build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(command);
         });
