@@ -2,47 +2,89 @@ package io.github.godoyjoao.server.customMob;
 
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
-import io.papermc.paper.datacomponent.DataComponentType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.command.CommandSender;
-import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+@SuppressWarnings("@ApiStatus.Experimental")
 public class CustomMobCommand {
 
-    public static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
-      return Commands.literal("customMob")
-               .then(Commands.literal("summon")
-                .then(Commands.argument("id", IntegerArgumentType.integer(1))
-                        .executes(CustomMobCommand::summonCustomMob)))
-               .then(Commands.literal("add")
-                       .then(Commands.argument("name", StringArgumentType.string()))
-                       .then(Commands.argument("entity", ArgumentTypes.entity()))
-                       .executes(CustomMobCommand::createCustomMob));
+    private static JavaPlugin plugin;
+
+    public CustomMobCommand(JavaPlugin plugin) {
+        CustomMobCommand.plugin = plugin;
     }
 
-    private static int createCustomMob(CommandContext<CommandSourceStack> ctx) {
+    public static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
+        return Commands.literal("customMob")
+                .then(Commands.literal("summon")
+                        .then(Commands.argument("id", IntegerArgumentType.integer(1))
+                                .executes(CustomMobCommand::summonCustomMob)))
+                .then(Commands.literal("add")
+                        .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("entity", ArgumentTypes.entity())
+                                        .then(Commands.argument("location",ArgumentTypes.blockPosition())
+                                                .executes(CustomMobCommand::createCustomMob)))));
+
+
+    }
+
+    private static int createCustomMob(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        /// Tratamento de caso
+        File dataFolder = plugin.getDataFolder();
+        Map<String, File> content = new HashMap<>();
+        if (!dataFolder.exists()) {
+            dataFolder.mkdir();
+        } else {
+            if (dataFolder.listFiles().length > 0) {
+                for (File file : dataFolder.listFiles()) {
+                content.put(file.getName(), file);
+                }
+            }
+        }
+        File customEntities = new File(plugin.getDataFolder().getPath()+"/customEntities");
+        if (!customEntities.exists()) {
+            try {
+                customEntities.createNewFile();
+            } catch (IOException e) {
+                plugin.getComponentLogger().error("Não foi possível criar o arquivo.");
+                e.printStackTrace();
+            }
+        }
+        /// Início do comando em si.
+        CommandSender sender = ctx.getSource().getSender();
+        if (!(sender instanceof Player player)) {
+            return Command.SINGLE_SUCCESS;
+        }
+        EntitySelectorArgumentResolver entitySelectorArgumentResolver = ctx.getArgument("entity",EntitySelectorArgumentResolver.class);
+        Entity entity = entitySelectorArgumentResolver.resolve(ctx.getSource()).getFirst();
+        World world = player.getWorld();
+        Location location = player.getLocation();
+
 
 
         return Command.SINGLE_SUCCESS;
@@ -60,7 +102,7 @@ public class CustomMobCommand {
         World world = location.getWorld();
         Zombie zombie = (Zombie) world.spawnEntity(location, EntityType.ZOMBIE);
 
-        zombie.customName(Component.text("Zumbi",TextColor.color(200,200,50)));
+        zombie.customName(Component.text("Zumbi", TextColor.color(200, 200, 50)));
         zombie.setCustomNameVisible(true);
         zombie.getAttribute(Attribute.MAX_HEALTH).setBaseValue(50.0);
         zombie.setHealth(50.0);
