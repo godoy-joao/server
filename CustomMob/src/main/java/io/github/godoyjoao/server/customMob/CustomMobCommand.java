@@ -2,17 +2,16 @@ package io.github.godoyjoao.server.customMob;
 
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
+import io.papermc.paper.math.BlockPosition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
@@ -36,7 +35,9 @@ import org.checkerframework.checker.units.qual.N;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("@ApiStatus.Experimental")
 public class CustomMobCommand {
@@ -66,7 +67,7 @@ public class CustomMobCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
         return Commands.literal("customMob")
                 .then(Commands.literal("summon")
-                        .then(Commands.argument("id", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("id", StringArgumentType.string())
                                 .executes(CustomMobCommand::summonCustomMob)))
                 .then(Commands.literal("add")
                         .then(Commands.argument("id", StringArgumentType.string())
@@ -78,8 +79,9 @@ public class CustomMobCommand {
                                                                         .then(Commands.argument("chest", ArgumentTypes.itemStack())
                                                                                 .then(Commands.argument("legs", ArgumentTypes.itemStack())
                                                                                         .then(Commands.argument("boots", ArgumentTypes.itemStack())
-                                                                                                .executes(CustomMobCommand::createCustomMob)))))))))));
-
+                                                                                                .then(Commands.argument("location", ArgumentTypes.blockPosition())
+                                                                                                        .then(Commands.argument("world", ArgumentTypes.world())
+                                                                                                                .executes(CustomMobCommand::createCustomMob)))))))))))));
 
 
     }
@@ -91,52 +93,51 @@ public class CustomMobCommand {
         }
         String id = ctx.getArgument("id", String.class);
         String path = id + ".";
+
         Double maxHealth = ctx.getArgument("max health", Double.class);
+
         String entityName = ctx.getArgument("name", String.class);
+
         EntitySelectorArgumentResolver entitySelectorArgumentResolver = ctx.getArgument("entity", EntitySelectorArgumentResolver.class);
         Entity entity = entitySelectorArgumentResolver.resolve(ctx.getSource()).getFirst();
-        Location location = player.getLocation();
+
+        ItemStack hand = ctx.getArgument("hand", ItemStack.class);
+        ItemStack helmet = ctx.getArgument("helmet", ItemStack.class);
+        ItemStack chest = ctx.getArgument("chest", ItemStack.class);
+        ItemStack legs = ctx.getArgument("legs", ItemStack.class);
+        ItemStack boots = ctx.getArgument("boots", ItemStack.class);
+
+        World world = ctx.getArgument("world", World.class);
+
+        BlockPositionResolver blockPositionResolver = ctx.getArgument("location", BlockPositionResolver.class);
+        BlockPosition blockPosition = blockPositionResolver.resolve(ctx.getSource());
+
+
         config.set(path + "name", entityName);
         config.set(path + "maxHealth", maxHealth);
         config.set(path + "entityType", entity.getName());
-        config.set(path + "world", player.getWorld().getName());
-        config.set(path + "locationX", location.getX());
-        config.set(path + "locationY", location.getY());
-        config.set(path + "locationZ", location.getZ());
-        
+        config.set(path + "world", world.getName());
+        config.set(path + "location.X", blockPosition.x());
+        config.set(path + "location.Y", blockPosition.y());
+        config.set(path + "location.Z", blockPosition.z());
+
+
 
         return Command.SINGLE_SUCCESS;
     }
 
+
+
     private static int summonCustomMob(CommandContext<CommandSourceStack> ctx) {
-        int id = IntegerArgumentType.getInteger(ctx, "id");
+        String id = StringArgumentType.getString(ctx, "id");
         CommandSender sender = ctx.getSource().getSender();
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Esse comando só pode ser executado por um jogador!");
-            return Command.SINGLE_SUCCESS;
+        Set<String> idsValidos = config.getKeys(false);
+        if (idsValidos.isEmpty()) {
+            sender.sendMessage("Não há mobs para listar.");
         }
 
-        Location location = player.getLocation();
-        World world = location.getWorld();
-        Zombie zombie = (Zombie) world.spawnEntity(location, EntityType.ZOMBIE);
 
-        zombie.customName(Component.text("Zumbi", TextColor.color(200, 200, 50)));
-        zombie.setCustomNameVisible(true);
-        zombie.getAttribute(Attribute.MAX_HEALTH).setBaseValue(50.0);
-        zombie.setHealth(50.0);
-        EntityEquipment equipment = zombie.getEquipment();
-        ItemStack diamondChestplate = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        ItemMeta meta = diamondChestplate.getItemMeta();
-        meta.addEnchant(Enchantment.UNBREAKING, 100, true);
-        meta.addEnchant(Enchantment.PROTECTION, 100, true);
-        meta.addEnchant(Enchantment.THORNS, 15, true);
-        diamondChestplate.setItemMeta(meta);
-        equipment.setHelmet(new ItemStack(Material.ACACIA_BOAT));
-        equipment.setChestplate(diamondChestplate);
-        equipment.setDropChance(EquipmentSlot.CHEST, 100);
-        for (ItemStack item : equipment.getArmorContents()) {
-            ctx.getSource().getSender().sendMessage(item.displayName());
-        }
+
 
         return Command.SINGLE_SUCCESS;
     }
