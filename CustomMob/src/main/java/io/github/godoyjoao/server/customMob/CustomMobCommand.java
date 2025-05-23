@@ -42,9 +42,25 @@ import java.util.Map;
 public class CustomMobCommand {
 
     private static JavaPlugin plugin;
+    private static File file;
+    private static FileConfiguration config;
 
     public CustomMobCommand(JavaPlugin plugin) {
         CustomMobCommand.plugin = plugin;
+        initialize();
+    }
+
+    public static void initialize() {
+        file = new File(plugin.getDataFolder(), "custom-mob.yml");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        config = YamlConfiguration.loadConfiguration(file);
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
@@ -57,7 +73,13 @@ public class CustomMobCommand {
                                 .then(Commands.argument("name", StringArgumentType.string())
                                         .then(Commands.argument("entity", ArgumentTypes.entity())
                                                 .then(Commands.argument("max health", DoubleArgumentType.doubleArg())
-                                                        .executes(CustomMobCommand::createCustomMob))))));
+                                                        .then(Commands.argument("hand", ArgumentTypes.itemStack())
+                                                                .then(Commands.argument("helmet", ArgumentTypes.itemStack())
+                                                                        .then(Commands.argument("chest", ArgumentTypes.itemStack())
+                                                                                .then(Commands.argument("legs", ArgumentTypes.itemStack())
+                                                                                        .then(Commands.argument("boots", ArgumentTypes.itemStack())
+                                                                                                .executes(CustomMobCommand::createCustomMob)))))))))));
+
 
 
     }
@@ -68,19 +90,20 @@ public class CustomMobCommand {
             return Command.SINGLE_SUCCESS;
         }
         String id = ctx.getArgument("id", String.class);
+        String path = id + ".";
         Double maxHealth = ctx.getArgument("max health", Double.class);
         String entityName = ctx.getArgument("name", String.class);
         EntitySelectorArgumentResolver entitySelectorArgumentResolver = ctx.getArgument("entity", EntitySelectorArgumentResolver.class);
         Entity entity = entitySelectorArgumentResolver.resolve(ctx.getSource()).getFirst();
-
-        World world = player.getWorld();
         Location location = player.getLocation();
-        File file = new File(plugin.getDataFolder(), "custom-mobs.yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        config.set(id, id);
+        config.set(path + "name", entityName);
+        config.set(path + "maxHealth", maxHealth);
+        config.set(path + "entityType", entity.getName());
+        config.set(path + "world", player.getWorld().getName());
+        config.set(path + "locationX", location.getX());
+        config.set(path + "locationY", location.getY());
+        config.set(path + "locationZ", location.getZ());
         
-
-
 
         return Command.SINGLE_SUCCESS;
     }
