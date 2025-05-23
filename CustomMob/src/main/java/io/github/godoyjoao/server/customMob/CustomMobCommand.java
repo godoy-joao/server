@@ -20,10 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -81,7 +78,8 @@ public class CustomMobCommand {
                                                                                         .then(Commands.argument("boots", ArgumentTypes.itemStack())
                                                                                                 .then(Commands.argument("location", ArgumentTypes.blockPosition())
                                                                                                         .then(Commands.argument("world", ArgumentTypes.world())
-                                                                                                                .executes(CustomMobCommand::createCustomMob)))))))))))));
+                                                                                                                .then(Commands.argument("level", IntegerArgumentType.integer())
+                                                                                                                        .executes(CustomMobCommand::createCustomMob))))))))))))));
 
 
     }
@@ -95,6 +93,8 @@ public class CustomMobCommand {
         String path = id + ".";
 
         Double maxHealth = ctx.getArgument("max health", Double.class);
+
+        Integer level = ctx.getArgument("level", Integer.class);
 
         String entityName = ctx.getArgument("name", String.class);
 
@@ -127,7 +127,6 @@ public class CustomMobCommand {
     }
 
 
-
     private static int summonCustomMob(CommandContext<CommandSourceStack> ctx) {
         String id = StringArgumentType.getString(ctx, "id");
         CommandSender sender = ctx.getSource().getSender();
@@ -135,8 +134,6 @@ public class CustomMobCommand {
         if (idsValidos.isEmpty()) {
             sender.sendMessage("Não há mobs para listar.");
         }
-
-
 
 
         return Command.SINGLE_SUCCESS;
